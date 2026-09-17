@@ -1,0 +1,74 @@
+
+======================================================================
+真实类别 7，预测为 2，共 9 条
+======================================================================
+
+案例 1
+原始索引: 3745
+置信差距: 2.5895
+文本节选:
+From: buhrow@moria.nfbcal.org (Brian Buhrow) Subject: NEED HELP FINDING DIP SWITCH SETTINGS AND JUMPER SETTINGS FOR 386SX MOTHERBOARD Keywords: JUMPER SETTINGS DIP-SWITCH SETTINGS, HELP, COMPUTER 386SX Organization: National Federation of the Blind of California Lines: 14 Hello net. I have a 386sx motherboard with the Phoenix BIOS, an on-board IDE controller port, and two on-board serial ports. Unfortunately, I don't have a manual for this beast and I would like to be able to disable the IDE controller in order to use the MFM controller I have. The board says it is made in Korea and it uses the Chips Chipset. If anyone can give me a clue as to how to go about configuring the board so as not to use the IDE controller, or how to go about finding out how to do it, their help would be greatly appreciated. Thank you in advance for your assistance. Please mail buhrow@nfbcal.org with your responses as my news feed is rather tenuous. Thank you very much! -Brian <buhrow@nfbcal.org>
+
+
+案例 2
+原始索引: 6795
+置信差距: 1.3989
+文本节选:
+From: little@nuts2u.enet.dec.com (My name is...) Subject: FOR SALE: OMTI 3527 : ST-506 RLL to SCSI adapters Organization: Digital Equipment Corporation Lines: 14 I have 2 OMTI 3527 SCSI adapters for sale. These make an ST-506 RLL drive look like a SCSI disk drive. Each adapter will support two RLL drives. I have used this model OMTI adapter with my Amiga A500 and a C-Ltd SCSI host adapter without problems. I'm selling these because I got them about the same time I decided to sell instead of expand my Amiga so I have never even used them. I can't guarantee they will work with every SCSI host adapter. They are essentially new in box. I paid $150/ea, make me an offer. Regards, Todd (708) 202-1030 little@pecan.enet.dec.com
+
+
+案例 3
+原始索引: 7309
+置信差距: 1.3012
+文本节选:
+From: ebraeden@magnus.acs.ohio-state.edu (Eric W Braeden) Subject: What exactly is an IBM 486SLC processor? Nntp-Posting-Host: photon.magnus.acs.ohio-state.edu Organization: The Ohio State University Distribution: na Lines: 11 Could someone please tell me if the 486SLC and 486SLC2 processors IBM is putting in their Thinkpad 700's and other PC's is a REAL 486 with a math coprocessor or if it is really some Kludge that should not be called a 486 at all? Thanks, Eric -- Eric W. Braeden | "Der Verstand war zwar praechtig Ohio State University | doch das Nuetzte am Ende nicht viel" ebraeden@magnus.acs.ohio-state.edu | Peter Schilling 120 Grad 1983
+
+
+======================================================================
+真实类别 2，预测为 1，共 7 条
+======================================================================
+
+案例 1
+原始索引: 937
+置信差距: 1.0495
+文本节选:
+From: ted@isgtec.com (Ted Richards) Subject: Re: pc-X Distribution: usa Organization: ISG Technologies Inc. Mississauga Ont. Canada Lines: 43 X-Newsreader: TIN [version 1.1 PL9] To following up my own note: Ted Richards (ted@isgtec.com) wrote: : Al DeVilbiss (al@col.hp.com) wrote: : : : : It looks like everything works as advertised but I am disappointed : : with the speed. I'm using an Intel 400 internal 14.4k modem in the PC : : with Telebit 14.4k on the Unix end, which are currently limited to : : 19.2Kbits by the Unix com link. To get a quantitative comparison, I : : did 'cat file' where "file" is 20 kbyte uncompressed ascii text, and : : it took 75 seconds to scroll through an X window over the modem link, : : 270 chars/sec. Using the identical hardware and Procomm+FW the same : : "cat file' takes 11 seconds, 1820 chars/sec. BTW, I use NCD PC XView : : on my PC at work (HP) every day for the same Unix access from a PC over : : a LAN and like that just fine. The same 'cat file' scrolls by in : : ~2 seconds on the LAN connection. I just tried a few experiments. I cat'd a 20261-byte file (471 lines) under various scenarios: PC-Xview for DOS in a full-screen OS/2 window (1024x768x
+
+
+案例 2
+原始索引: 1796
+置信差距: 0.9011
+文本节选:
+From: rmm@cbnewsg.cb.att.com (richard.m.maniscalco) Subject: Re: Share your optimization tips Organization: AT&T Lines: 33 In article <1pm61pINNp45@geraldo.cc.utexas.edu> jbodnar@ccwf.cc.utexas.edu (John Bodnar) writes: >According to e_p@unl.edu (edgar pearlstein): >> Here's another one: >> >> 5. My computer arrived with the following statement in its >> config.sys file: STACKS = 9,256. I changed it to >> STACKS = 8,128 and saved 1296 bytes. Maybe it could be >> lowered even more, but I haven't tried it. > >Exactly. > >Regardless of what Microsoft says, I have set STACKS=0,0 on every single >computer I have installed Windows on from a simple 386SX-16 up to 486DX-50 >with EISA motherboards, NDI Volante TIGA adapters, Intel Ethernet Express >cards, and caching SCSI controllers from DPT and DTC. > >Not a problem yet, and the extra 2K+ gained means a lot with conventional >memory gobbling programs like OrCAD and Tango PCB. >-- >John Bodnar : "While we liked developing Windows >The University of Texas at Austin : applications, we never inhaled." >Internet: jbodnar@ccwf.cc.utexas.edu : >UUCP: ....!cs.utexas!ut-ccwf!jbodnar : -- Borland CEO Philippe Kahn I remember reading somewhere (QEMM
+
+
+案例 3
+原始索引: 320
+置信差距: 0.5757
+文本节选:
+From: swh@capella.cup.hp.com (Steve Harrold) Subject: Re: Need Info on Diamond Viper Video Card Organization: Hewlett Packard, Cupertino Lines: 46 Experiences with Diamond Viper VLB video card Several problems: 1) The ad specified 16.7 million colors at 640x480 resolution with 1MB of VRAM, which is what I have. This color depth is NOT SUPPORTED with video BIOS version 1.00 and drivers version 1.01. A max of 65K colors are supported at 640x800 and 800x600 resolutions with 1MB VRAM. 2) With the 65K color choice I notice two minor irritations: a) Under NDW, when an entry in a list is highlighted (such as in an Open menu) and then is deselected, a faint vertical line often remains where the left edge of the highlighted rectangle used to be. b) With Word for Windows, when you use shading in a table, the display shows the INVERSE of the shading; for example, if you shade the cell as 10%, the display is 90% (the printout is OK). 3) The big killer bug is using the Borland C++ Integrated Development Environment. The problem occurs when you click on the Turbo Debugger icon (or use the Debugger option in the Run command), and the debugger application goes to VGA character mode (as it is desig
+
+
+======================================================================
+真实类别 2，预测为 7，共 6 条
+======================================================================
+
+案例 1
+原始索引: 4103
+置信差距: 0.5537
+文本节选:
+Subject: Looking for replacement for a JVC-disk From: michael@pcmith.rks.se (Michael Thurbin) Organization: Sommarvagen 1, S-352 37 Vaxjoe, SWEDEN Lines: 22 Hi! I got hold of an old Zenith 286 Laptop with model# ZWL-183-45 The hard-disk is dead but the rest seems to work. I took the Zenith apart and found a very strange disk for wich I now try to replace. The disk is marked JVC, model JD3824R00-1. Has anyone any specs. on this disk or suggestion where i can find it or a cheap replacement for it. Thanks for your help. -- Michael Michael Thurbin (michael@pcmith.rks.se) -- ************************************************************************************************** Michael Thurbin Sommarvagen 1 Phone: +46 (0)47021340 S-352 37 Vaxjoe Fax: +46 (0)47048978 SWEDEN **************************************************************************************************
+
+
+案例 2
+原始索引: 1376
+置信差距: 0.3713
+文本节选:
+From: stevela@csulb.edu (Steve La) Subject: CDROM Audio cable... Lines: 10 Organization: Cal State Long Beach Distribution: usa I am looking for a CDROM audio cable to connect my Toshiba 3401B (L/R audio) to the Pro Audio Spectrum 16 sound card. Thanks in advance for any pointers... -Steve ___ _____ ____ _ _ ____ _ __ Steve La / ___) (_ _) | ___) | || | | ___) | | / \ Network Manager \__ \ | | | _)_ | || | | _)_ | |__ | || | stevela@csulb.edu (____/ |_| |____) \__/ |____) |____) |_||_| (310) 985-4750 CALSTATE UNIVERSITY LONG BEACH, 1250 Bellflower Blvd. Long Beach, CA 90840
+
+
+案例 3
+原始索引: 798
+置信差距: 0.2681
+文本节选:
+From: vixie@pa.dec.com (Paul A Vixie) Subject: Re: 17" monitor with RGB/sync to VGA ?? Organization: DEC Network Systems Lab Lines: 15 Distribution: usa NNTP-Posting-Host: cognition.pa.dec.com In-reply-to: rash@access.digex.com's message of 18 Apr 1993 18:46:08 -0400 Yes, but what if my monitor only has 3 BNC's on it, and is expecting to get a composite sync signal on the "green"? There ought to be a little black box that takes the VGA signalling (which has horiz, vert, and composite sync on different pins, plus the R, G, and B pairs) and merges the green and composite sync together in the output. It's all 1V analog, as far as I know. I can build this with op-amps but I don't think I can get the shielding done well enough to handle the frequencies involved without lots of shadows and junk on the screen. Does anyone know of a VGA->RGB(composite sync on green) converter? -- Paul Vixie, DEC Network Systems Lab Palo Alto, California, USA "Don't be a rebel, or a conformist; <vixie@pa.dec.com> decwrl!vixie they're the same thing, anyway. Find <paul@vix.com> vixie!paul your own path, and stay on it." -me
