@@ -1,6 +1,6 @@
 # 当代人工智能实验一：文本分类
 
-本项目使用 TF-IDF 和经典机器学习算法完成新闻文本十分类任务，包含模型对比、超参数实验、特征消融、训练过程可视化、错误分析以及测试集预测。
+本项目使用 TF-IDF 和经典机器学习算法完成新闻文本十分类任务，包含模型比较、超参数实验、特征消融、损失曲线、错误分析和测试集预测。
 
 ## 项目结构
 
@@ -18,14 +18,15 @@ data-Project1/
 │   ├── svm_feature_count_tuning.py
 │   ├── svm_header_ablation.py
 │   ├── loss_curve_experiment.py
+│   ├── loss_minibatch_experiment.py
 │   ├── svm_error_analysis.py
 │   ├── inspect_errors.py
 │   └── final_train_predict.py
 ├── results/
 │   ├── run_results.csv
 │   ├── final_model_config.json
-│   ├── loss_constant_100_curve.png
-│   ├── loss_constant_100_f1_curve.png
+│   ├── loss_minibatch_curve.png
+│   ├── loss_minibatch_history.csv
 │   ├── svm_c_tuning_curve.png
 │   ├── svm_feature_count_curve.png
 │   ├── svm_feature_compare.png
@@ -34,21 +35,34 @@ data-Project1/
 │   └── 其他实验结果
 ├── run_experiment.py
 ├── predictions.csv
+├── prediction.csv
 ├── README.md
 └── TUNING.md
 ```
 
 ## 数据集
 
-有标签训练集包含 7368 条文本，无标签测试集包含 2457 条文本，任务共有 10 个类别。
+训练集文件：
 
-验证阶段采用固定的分层划分：
+```text
+data/train_data.csv
+```
 
-- 训练子集：80%，5894 条
-- 验证子集：20%，1474 条
-- 随机种子：42
+测试集文件：
 
-测试集不参与模型选择、超参数调整和验证评估。最终方案确定后，才使用全部有标签数据重新训练最终模型并预测测试集。
+```text
+data/test_data_unlabeled.csv
+```
+
+训练集包含 7368 条带标签文本，测试集包含 2457 条无标签文本，共有 10 个类别。
+
+有标签数据按照类别分层划分为：
+
+- 训练子集：80%，5894 条；
+- 验证子集：20%，1474 条；
+- 随机种子：42。
+
+测试集不参与模型选择、超参数调整或验证评估。最终方案确定后，才使用全部有标签数据重新训练模型并生成测试集预测。
 
 ## 环境要求
 
@@ -69,7 +83,7 @@ scikit-learn 1.9.1
 matplotlib 3.10.9
 ```
 
-## 快速运行
+## 一键运行
 
 在项目根目录执行：
 
@@ -77,27 +91,35 @@ matplotlib 3.10.9
 python run_experiment.py
 ```
 
-统一运行程序会自动完成：
+该命令会自动完成：
 
 1. 从 `data/` 读取训练集和测试集；
-2. 对有标签数据进行固定的分层训练/验证划分；
-3. 使用相同的 TF-IDF 特征比较朴素贝叶斯、逻辑回归和线性 SVM；
+2. 按标签分层划分训练集和验证集；
+3. 使用相同的 TF-IDF 特征比较三个分类模型；
 4. 保存验证结果到 `results/run_results.csv`；
-5. 使用全部有标签数据重新训练最终模型；
-6. 生成根目录下的 `predictions.csv`；
-7. 保存最终模型配置到 `results/final_model_config.json`。
+5. 使用全部有标签数据训练最终 LinearSVC；
+6. 生成 `predictions.csv`；
+7. 生成课程提交所需的 `prediction.csv`；
+8. 保存最终模型配置到 `results/final_model_config.json`。
 
-## 统一模型比较
+如需同时重新生成 mini-batch 损失曲线，执行：
 
-三个模型使用相同的数据划分和 TF-IDF 特征设置，结果如下：
+```bash
+python run_experiment.py --full
+```
 
-| 模型 | 验证 Accuracy | 验证 Macro-F1 |
-|---|---:|---:|
-| MultinomialNB | 0.9104 | 0.9109 |
-| LogisticRegression | 0.9220 | 0.9224 |
-| LinearSVC | **0.9430** | **0.9431** |
+完整模式会额外运行：
 
-线性 SVM 在高维、稀疏的 TF-IDF 特征上取得了最佳验证性能。
+```text
+src/loss_minibatch_experiment.py
+```
+
+并生成：
+
+```text
+results/loss_minibatch_history.csv
+results/loss_minibatch_curve.png
+```
 
 ## 最终模型
 
@@ -113,36 +135,30 @@ C：1.0
 random_state：42
 ```
 
-验证集结果：
+最终模型在验证集上的结果：
 
 ```text
 Accuracy：0.9430
 Macro-F1：0.9431
 ```
 
-最终使用全部 7368 条有标签文本重新拟合 TF-IDF 和 LinearSVC，并为 2457 条测试文本生成预测。
+确定方案后，使用全部 7368 条有标签文本重新拟合 TF-IDF 和 LinearSVC，并对 2457 条测试文本进行预测。
 
-## 预测文件
+## 模型比较
 
-最终预测文件为：
+三个模型使用相同的数据划分和 TF-IDF 特征设置：
 
-```text
-predictions.csv
-```
+| 模型 | 验证 Accuracy | 验证 Macro-F1 |
+|---|---:|---:|
+| MultinomialNB | 0.9104 | 0.9109 |
+| LogisticRegression | 0.9220 | 0.9224 |
+| LinearSVC | **0.9430** | **0.9431** |
 
-文件格式：
+线性 SVM 在高维、稀疏的 TF-IDF 特征上表现最好。
 
-- 无表头
-- 无索引
-- 每行一个类别标签
-- 共 2457 行
-- 包含 10 个预测类别
+## SVM 正则化参数实验
 
-## 实验设计
-
-### SVM 正则化参数
-
-保持数据划分和 TF-IDF 特征不变，只改变 `C`：
+在 5000 维 unigram 特征下固定其他条件，只改变 SVM 的 `C`：
 
 | C | 验证 Macro-F1 |
 |---:|---:|
@@ -152,11 +168,11 @@ predictions.csv
 | 10 | 0.9127 |
 | 100 | 0.9102 |
 
-较小的 `C` 导致欠拟合；当 `C` 大于 1 后，训练性能继续提升，但验证性能下降且泛化差距扩大。因此选择 `C=1.0`。
+较小的 `C` 导致欠拟合；当 `C` 大于 1 后，训练集性能继续提高，但验证性能下降、泛化差距扩大。因此后续实验固定 `C=1.0`。
 
-### TF-IDF 词表容量
+## TF-IDF 词表容量实验
 
-保持 unigram 和 `C=1.0` 不变，只改变最大特征数：
+保持 unigram 和 `C=1.0` 不变，只改变词表容量：
 
 | 实际特征数 | 验证 Macro-F1 |
 |---:|---:|
@@ -165,52 +181,47 @@ predictions.csv
 | 20000 | 0.9417 |
 | 38178 | **0.9431** |
 
-扩大词表明显改善验证性能，但从 20000 增加到 38178 后边际收益已经较小。
+增加词表容量能够保留更多类别相关词。从 20000 增加到 38178 后，性能仅提升约 0.14 个百分点，边际收益已经较小。
 
-### unigram 与 bigram
+## unigram 与 bigram 对比
 
 在相同的 20000 维特征预算下：
 
-| 特征 | 验证 Macro-F1 |
+| 特征表示 | 验证 Macro-F1 |
 |---|---:|
 | unigram | **0.9417** |
 | unigram + bigram | 0.9319 |
 
-二元词组增加了稀疏性，并在固定词表容量下占用了部分有效单词特征空间，因此没有带来提升。
+加入 bigram 后性能下降，可能是因为二元词组增加了稀疏性，并占用了原本可以表示有效单词的特征空间。
 
-### 邮件头消融
+## 邮件头消融实验
 
 | 文本输入 | 验证 Macro-F1 |
 |---|---:|
 | 原始邮件文本 | **0.9431** |
-| 仅邮件正文 | 0.9248 |
+| 仅保留正文 | 0.9248 |
 
-删除邮件头使性能下降约 1.82 个百分点。实验说明 `Subject`、`Organization` 和发件人等邮件头信息包含有效的类别线索，因此最终方案保留原始文本。
+删除邮件头后 Macro-F1 下降约 1.82 个百分点。这说明 `Subject`、`Organization` 和发件人等邮件头信息包含有效的类别线索。因此最终模型保留原始邮件文本。
 
 ## 损失曲线
 
-最终模型 `LinearSVC` 不提供逐轮概率损失，因此训练过程可视化单独使用：
+最终模型 `LinearSVC` 不提供逐轮概率损失，因此单独使用：
 
 ```text
 SGDClassifier(loss="log_loss")
 ```
 
-该实验仅用于观察 Log Loss 随训练轮次的变化，不将其表述为最终 SVM 的损失曲线。
+观察优化过程。该损失曲线不代表最终 LinearSVC 的训练损失。
 
-在 100 轮训练中：
+模型采用 batch size 为 256 的 mini-batch 增量训练，共训练 20 个 epoch、更新 480 次。每次参数更新后记录当前批次训练损失和固定验证集损失。
 
-- 训练 Log Loss 从 2.2450 降至 0.6843；
-- 验证 Log Loss 从 2.2488 降至 0.8129；
-- 最高验证 Macro-F1 为 0.9184；
-- 在 100 轮内未观察到验证损失反弹。
+由于不同 mini-batch 的样本组成不同，训练损失存在真实的局部波动；移动平均线用于显示整体趋势。最低验证损失为 1.4334，出现在第 480 次更新。这说明在当前观察范围内模型仍处于收敛阶段，尚未出现验证损失反弹。
 
-因此，在该学习率与正则化设置下模型仍处于缓慢收敛阶段，不能仅根据训练轮数断言出现过拟合。
+验证损失是在同一个完整验证集上计算的，因此比单个 mini-batch 的训练损失更平滑。曲线的局部波动来自随机批次训练，不是人为添加的噪声。
 
 ## 错误分析
 
-最佳 SVM 的错误主要集中在类别 0、1、2 和 7。
-
-代表性主题词表明：
+最佳 LinearSVC 的错误主要集中在类别 0、1、2 和 7。
 
 | 类别 | 主要主题 |
 |---:|---|
@@ -219,7 +230,7 @@ SGDClassifier(loss="log_loss")
 | 2 | 计算机硬件 |
 | 7 | 电子、电路与音频 |
 
-最常见混淆方向：
+最常见的混淆方向：
 
 | 真实类别 | 预测类别 | 数量 |
 |---:|---:|---:|
@@ -227,11 +238,31 @@ SGDClassifier(loss="log_loss")
 | 2 | 1 | 7 |
 | 2 | 7 | 6 |
 
-错误案例涉及主板、BIOS、硬盘接口、音频线和显示器信号等内容。这些文本同时包含计算机硬件和电子电路词汇，说明错误部分来自类别之间真实的语义重叠，而不只是随机误判。
+错误案例涉及主板、BIOS、硬盘接口、音频线和显示器信号等内容。这些文本同时包含计算机硬件和电子电路词汇，说明部分错误来自类别之间真实的语义重叠。
+
+## 预测文件
+
+程序会生成两个内容相同的预测文件：
+
+```text
+predictions.csv
+prediction.csv
+```
+
+其中：
+
+- `predictions.csv`：仓库中的预测结果；
+- `prediction.csv`：按照课程要求放入提交压缩包的文件。
+
+两个文件均满足：
+
+- 无表头；
+- 无索引；
+- 每行一个预测标签；
+- 共 2457 行；
+- 包含 10 个类别。
 
 ## 详细实验脚本
-
-`src/` 中保存了各阶段的独立实验脚本，用于展示完整探索过程：
 
 | 脚本 | 功能 |
 |---|---|
@@ -242,27 +273,33 @@ SGDClassifier(loss="log_loss")
 | `svm_feature_count_tuning.py` | TF-IDF 词表容量实验 |
 | `svm_feature_compare.py` | unigram 与 bigram 对比 |
 | `svm_header_ablation.py` | 邮件头消融实验 |
-| `loss_curve_experiment.py` | Log Loss 和 Macro-F1 曲线 |
+| `loss_curve_experiment.py` | 按 epoch 记录损失的早期对照实验 |
+| `loss_minibatch_experiment.py` | Mini-batch Log Loss 与移动平均曲线 |
 | `svm_error_analysis.py` | 分类报告与混淆矩阵 |
 | `inspect_errors.py` | 代表词和典型错误案例 |
 | `final_train_predict.py` | 最终训练与测试集预测 |
 
-这些独立脚本记录实验过程。为了便于验收，推荐直接运行根目录中的 `run_experiment.py`。
+这些脚本记录了完整的实验探索过程。验收时推荐直接运行根目录中的：
+
+```bash
+python run_experiment.py
+```
 
 ## 结果文件
 
 `results/` 中保存：
 
-- 统一模型比较结果
-- SVM 参数实验结果和曲线
-- TF-IDF 词表容量实验结果和曲线
-- unigram/bigram 对比结果
-- 邮件头消融结果
-- Log Loss 与 Macro-F1 曲线
-- 混淆矩阵
-- 类别代表词
-- 典型错误案例
-- 最终模型配置
+- `run_results.csv`：统一模型比较结果；
+- `final_model_config.json`：最终模型配置；
+- `loss_minibatch_curve.png`：mini-batch 损失曲线；
+- `loss_minibatch_history.csv`：mini-batch 损失记录；
+- SVM 参数实验结果和曲线；
+- TF-IDF 词表容量实验结果和曲线；
+- unigram/bigram 对比结果；
+- 邮件头消融结果；
+- 混淆矩阵；
+- 类别代表词；
+- 典型错误案例。
 
 ## 可复现性
 
@@ -271,5 +308,5 @@ SGDClassifier(loss="log_loss")
 - TF-IDF 只在训练子集上拟合；
 - 验证集仅使用已拟合的向量器转换；
 - 测试集不用于调参或模型选择；
-- 最终配置确定后，才使用全部有标签数据重新训练；
-- 模型参数、验证结果和预测文件均已保存。
+- 最终方案确定后，才使用全部有标签数据重新训练；
+- 模型参数、验证结果、损失记录和预测文件均已保存。
