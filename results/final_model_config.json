@@ -1,0 +1,14 @@
+{
+  "seed": 42,
+  "validation_ratio": 0.2,
+  "model": "LinearSVC",
+  "C": 1.0,
+  "feature": "TF-IDF unigram",
+  "min_df": 2,
+  "sublinear_tf": true,
+  "text_processing": "raw_text",
+  "train_samples": 7368,
+  "test_samples": 2457,
+  "feature_count": 43277,
+  "prediction_file": "predictions.csv"
+}
