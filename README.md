@@ -14,15 +14,17 @@ data-Project1/
 │   ├── logistic_baseline.py
 │   ├── svm_baseline.py
 │   ├── svm_c_tuning.py
+│   ├── fusion_c_tuning.py
+│   ├── fusion_c05_multi_seed.py
 │   ├── svm_feature_compare.py
 │   ├── svm_feature_count_tuning.py
 │   ├── svm_header_ablation.py
-│   ├── loss_curve_experiment.py
-│   ├── loss_minibatch_experiment.py
 │   ├── char_tfidf_experiment.py
 │   ├── word_char_fusion_experiment.py
 │   ├── multi_seed_experiment.py
 │   ├── fusion_multi_seed_experiment.py
+│   ├── loss_curve_experiment.py
+│   ├── loss_minibatch_experiment.py
 │   ├── svm_error_analysis.py
 │   ├── inspect_errors.py
 │   ├── final_train_predict.py
@@ -31,6 +33,9 @@ data-Project1/
 │   ├── final_fusion_model_config.json
 │   ├── char_tfidf_results.csv
 │   ├── word_char_fusion_results.csv
+│   ├── fusion_c_tuning_results.csv
+│   ├── fusion_c05_multi_seed_results.csv
+│   ├── fusion_c05_multi_seed_summary.csv
 │   ├── fusion_multi_seed_results.csv
 │   ├── fusion_multi_seed_summary.csv
 │   ├── loss_minibatch_curve.png
@@ -82,7 +87,6 @@ pip install numpy pandas scipy scikit-learn matplotlib
 ```text
 Python 3.13.12
 pandas 3.0.3
-scipy
 scikit-learn 1.9.1
 matplotlib 3.10.9
 ```
@@ -112,10 +116,10 @@ word-level TF-IDF unigram
 +
 char_wb-level TF-IDF 3~5 gram
 +
-LinearSVC(C=1.0)
+LinearSVC(C=0.5)
 ```
 
-运行结束后，检查预测文件：
+运行结束后检查预测文件：
 
 ```bash
 python -c "import pandas as pd; a=pd.read_csv('predictions.csv',header=None); b=pd.read_csv('prediction.csv',header=None); print(a.shape,b.shape,a.equals(b))"
@@ -133,7 +137,7 @@ word 特征 min_df：2
 char 特征 min_df：2
 char 特征最大数量：80000
 分类器：LinearSVC
-C：1.0
+C：0.5
 random_state：42
 ```
 
@@ -147,7 +151,7 @@ char 特征数：80000
 
 ## 模型比较结果
 
-在单次固定验证划分中：
+在 `seed=42` 的单次固定验证划分中：
 
 | 模型或特征表示 | 验证 Accuracy | 验证 Macro-F1 |
 |---|---:|---:|
@@ -156,13 +160,14 @@ char 特征数：80000
 | word TF-IDF + LinearSVC | 0.9430 | 0.9431 |
 | char TF-IDF + LinearSVC | 0.9315 | 0.9319 |
 | char_wb TF-IDF + LinearSVC | 0.9369 | 0.9373 |
-| word + char_wb 融合 | **0.9484** | **0.9486** |
+| word + char_wb 融合，C=1.0 | 0.9484 | 0.9486 |
+| word + char_wb 融合，C=0.5 | **0.9498** | **0.9500** |
 
 字符特征单独使用时不如 word unigram，但与 word unigram 融合后性能提升，说明字符级特征能够补充技术型号、缩写、词形和特殊字符串信息。
 
 ## 多随机种子实验
 
-为了检验单次划分结果的稳定性，使用以下 5 个随机种子重复实验：
+为了检验数据划分带来的波动，使用以下 5 个随机种子重复实验：
 
 ```text
 42, 123, 2025, 3407, 2026
@@ -175,16 +180,25 @@ Accuracy = 0.9427 ± 0.0026
 Macro-F1 = 0.9430 ± 0.0026
 ```
 
-word + char_wb 融合模型结果：
+word + char_wb 融合模型、`C=1.0`：
 
 ```text
 Accuracy = 0.9459 ± 0.0038
 Macro-F1 = 0.9461 ± 0.0039
 ```
 
-融合模型的平均 Macro-F1 比 word unigram 提升约 0.31 个百分点。虽然融合模型的波动略有增加，但总体平均性能更高，因此选择融合模型作为最终方案。
+word + char_wb 融合模型、`C=0.5`：
+
+```text
+Accuracy = 0.9478 ± 0.0046
+Macro-F1 = 0.9480 ± 0.0046
+```
+
+`C=0.5` 的融合模型平均 Macro-F1 比 word unigram 提升约 0.50 个百分点。虽然其标准差略大，但平均性能更高，且单次验证结果也更好，因此最终选择 `C=0.5`。
 
 ## SVM 正则化参数实验
+
+### word-only 初始实验
 
 在 5000 维 unigram 特征下固定其他条件，只改变 SVM 的 `C`：
 
@@ -196,7 +210,19 @@ Macro-F1 = 0.9461 ± 0.0039
 | 10 | 0.9127 |
 | 100 | 0.9102 |
 
-较小的 `C` 导致欠拟合；当 `C` 大于 1 后，训练集性能继续提高，但验证性能下降、泛化差距扩大。因此后续实验固定 `C=1.0`。
+较小的 `C` 导致欠拟合；当 `C` 大于 1 后，训练集性能继续提高，但验证性能下降、泛化差距扩大。随后以 `C=1.0` 作为融合模型的初始参数。
+
+### 融合模型局部调参
+
+在最终 word + char_wb 融合特征下比较 `C=0.5、1.0、2.0`：
+
+| C | 验证 Macro-F1 | 泛化差距 |
+|---:|---:|---:|
+| 0.5 | **0.9500** | **0.0498** |
+| 1.0 | 0.9486 | 0.0512 |
+| 2.0 | 0.9493 | 0.0506 |
+
+`C=0.5` 在验证集上取得最高 Macro-F1，同时泛化差距最小，因此被锁定为最终参数。
 
 ## TF-IDF 词表容量实验
 
@@ -297,14 +323,16 @@ prediction.csv
 | `baseline.py` | 朴素贝叶斯基线 |
 | `logistic_baseline.py` | 逻辑回归基线 |
 | `svm_baseline.py` | 线性 SVM 基线 |
-| `svm_c_tuning.py` | SVM 参数 C 对照实验 |
+| `svm_c_tuning.py` | word-only SVM 参数实验 |
+| `fusion_c_tuning.py` | 融合模型 C 参数实验 |
+| `fusion_c05_multi_seed.py` | C=0.5 融合模型多随机种子实验 |
 | `svm_feature_count_tuning.py` | TF-IDF 词表容量实验 |
 | `svm_feature_compare.py` | unigram 与 bigram 对比 |
 | `svm_header_ablation.py` | 邮件头消融实验 |
 | `char_tfidf_experiment.py` | 字符级 TF-IDF 对照实验 |
 | `word_char_fusion_experiment.py` | word 与 char_wb 特征融合 |
 | `multi_seed_experiment.py` | word unigram 多随机种子实验 |
-| `fusion_multi_seed_experiment.py` | 融合模型多随机种子实验 |
+| `fusion_multi_seed_experiment.py` | C=1.0 融合模型多随机种子实验 |
 | `loss_curve_experiment.py` | 按 epoch 记录损失的早期对照实验 |
 | `loss_minibatch_experiment.py` | mini-batch Log Loss 曲线 |
 | `svm_error_analysis.py` | 分类报告与混淆矩阵 |
@@ -324,8 +352,11 @@ python run_experiment.py
 - `final_fusion_model_config.json`：最终融合模型配置；
 - `char_tfidf_results.csv`：字符级特征实验；
 - `word_char_fusion_results.csv`：特征融合实验；
-- `fusion_multi_seed_results.csv`：融合模型逐种子结果；
-- `fusion_multi_seed_summary.csv`：融合模型均值和标准差；
+- `fusion_c_tuning_results.csv`：融合模型 C 参数实验；
+- `fusion_c05_multi_seed_results.csv`：C=0.5 融合模型逐种子结果；
+- `fusion_c05_multi_seed_summary.csv`：C=0.5 融合模型均值和标准差；
+- `fusion_multi_seed_results.csv`：C=1.0 融合模型逐种子结果；
+- `fusion_multi_seed_summary.csv`：C=1.0 融合模型均值和标准差；
 - `multi_seed_results.csv`：word unigram 多种子结果；
 - `multi_seed_summary.csv`：word unigram 均值和标准差；
 - `loss_minibatch_curve.png`：mini-batch 损失曲线；
@@ -347,4 +378,4 @@ python run_experiment.py
 - 测试集不用于调参或模型选择；
 - 最终方案确定后，才使用全部有标签数据重新训练；
 - 模型参数、验证结果、损失记录和预测文件均已保存；
-- 根目录 `run_experiment.py` 可直接生成最终融合模型预测。
+- 根目录 `run_experiment.py` 可直接生成最终 `C=0.5` 融合模型预测。
