@@ -1,11 +1,17 @@
 {
   "seed": 42,
   "model": "LinearSVC",
-  "C": 1.0,
+  "C": 0.5,
   "text_processing": "raw_text",
   "feature_combination": "word_tfidf_unigram + char_wb_tfidf_3_5gram",
+  "word_analyzer": "word",
+  "word_ngram_range": [
+    1,
+    1
+  ],
   "word_min_df": 2,
   "word_sublinear_tf": true,
+  "char_analyzer": "char_wb",
   "char_ngram_range": [
     3,
     5
@@ -17,10 +23,12 @@
   "total_features": 123277,
   "train_samples": 7368,
   "test_samples": 2457,
-  "validation_accuracy_mean": 0.945862,
-  "validation_accuracy_std": 0.00382,
-  "validation_macro_f1_mean": 0.94609,
-  "validation_macro_f1_std": 0.003868,
+  "validation_seed_42_accuracy": 0.949796,
+  "validation_seed_42_macro_f1": 0.949982,
+  "multi_seed_accuracy_mean": 0.947761,
+  "multi_seed_accuracy_std": 0.004551,
+  "multi_seed_macro_f1_mean": 0.947959,
+  "multi_seed_macro_f1_std": 0.004604,
   "prediction_files": [
     "predictions.csv",
     "prediction.csv"
