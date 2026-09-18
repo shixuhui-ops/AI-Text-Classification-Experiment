@@ -1,6 +1,6 @@
 # 当代人工智能实验一：文本分类
 
-本项目使用 TF-IDF 和经典机器学习算法完成新闻文本十分类任务，包含模型比较、超参数实验、特征消融、损失曲线、错误分析和测试集预测。
+本项目使用 TF-IDF 和经典机器学习算法完成新闻文本十分类任务，包含模型比较、超参数实验、特征消融、字符特征融合、损失曲线、错误分析和测试集预测。
 
 ## 项目结构
 
@@ -19,19 +19,22 @@ data-Project1/
 │   ├── svm_header_ablation.py
 │   ├── loss_curve_experiment.py
 │   ├── loss_minibatch_experiment.py
+│   ├── char_tfidf_experiment.py
+│   ├── word_char_fusion_experiment.py
+│   ├── multi_seed_experiment.py
+│   ├── fusion_multi_seed_experiment.py
 │   ├── svm_error_analysis.py
 │   ├── inspect_errors.py
-│   └── final_train_predict.py
+│   ├── final_train_predict.py
+│   └── final_fusion_predict.py
 ├── results/
-│   ├── run_results.csv
-│   ├── final_model_config.json
+│   ├── final_fusion_model_config.json
+│   ├── char_tfidf_results.csv
+│   ├── word_char_fusion_results.csv
+│   ├── fusion_multi_seed_results.csv
+│   ├── fusion_multi_seed_summary.csv
 │   ├── loss_minibatch_curve.png
 │   ├── loss_minibatch_history.csv
-│   ├── svm_c_tuning_curve.png
-│   ├── svm_feature_count_curve.png
-│   ├── svm_feature_compare.png
-│   ├── svm_header_ablation.png
-│   ├── svm_confusion_matrix.png
 │   └── 其他实验结果
 ├── run_experiment.py
 ├── predictions.csv
@@ -71,7 +74,7 @@ data/test_data_unlabeled.csv
 安装依赖：
 
 ```bash
-pip install numpy pandas scikit-learn matplotlib
+pip install numpy pandas scipy scikit-learn matplotlib
 ```
 
 本实验实际运行环境：
@@ -79,6 +82,7 @@ pip install numpy pandas scikit-learn matplotlib
 ```text
 Python 3.13.12
 pandas 3.0.3
+scipy
 scikit-learn 1.9.1
 matplotlib 3.10.9
 ```
@@ -94,31 +98,27 @@ python run_experiment.py
 该命令会自动完成：
 
 1. 从 `data/` 读取训练集和测试集；
-2. 按标签分层划分训练集和验证集；
-3. 使用相同的 TF-IDF 特征比较三个分类模型；
-4. 保存验证结果到 `results/run_results.csv`；
-5. 使用全部有标签数据训练最终 LinearSVC；
-6. 生成 `predictions.csv`；
-7. 生成课程提交所需的 `prediction.csv`；
-8. 保存最终模型配置到 `results/final_model_config.json`。
+2. 检查数据列和样本数量；
+3. 使用最终融合特征训练 LinearSVC；
+4. 使用全部有标签数据重新拟合模型；
+5. 生成 `predictions.csv`；
+6. 生成课程提交所需的 `prediction.csv`；
+7. 保存最终模型配置到 `results/final_fusion_model_config.json`。
 
-如需同时重新生成 mini-batch 损失曲线，执行：
+最终融合模型包括：
+
+```text
+word-level TF-IDF unigram
++
+char_wb-level TF-IDF 3~5 gram
++
+LinearSVC(C=1.0)
+```
+
+运行结束后，检查预测文件：
 
 ```bash
-python run_experiment.py --full
-```
-
-完整模式会额外运行：
-
-```text
-src/loss_minibatch_experiment.py
-```
-
-并生成：
-
-```text
-results/loss_minibatch_history.csv
-results/loss_minibatch_curve.png
+python -c "import pandas as pd; a=pd.read_csv('predictions.csv',header=None); b=pd.read_csv('prediction.csv',header=None); print(a.shape,b.shape,a.equals(b))"
 ```
 
 ## 最终模型
@@ -127,34 +127,62 @@ results/loss_minibatch_curve.png
 
 ```text
 文本处理：保留原始邮件文本
-特征表示：TF-IDF unigram
-min_df：2
-sublinear_tf：True
+word 特征：TF-IDF unigram
+char 特征：char_wb TF-IDF 3~5 gram
+word 特征 min_df：2
+char 特征 min_df：2
+char 特征最大数量：80000
 分类器：LinearSVC
 C：1.0
 random_state：42
 ```
 
-最终模型在验证集上的结果：
+最终全量训练时：
 
 ```text
-Accuracy：0.9430
-Macro-F1：0.9431
+word 特征数：43277
+char 特征数：80000
+融合特征数：123277
 ```
 
-确定方案后，使用全部 7368 条有标签文本重新拟合 TF-IDF 和 LinearSVC，并对 2457 条测试文本进行预测。
+## 模型比较结果
 
-## 模型比较
+在单次固定验证划分中：
 
-三个模型使用相同的数据划分和 TF-IDF 特征设置：
-
-| 模型 | 验证 Accuracy | 验证 Macro-F1 |
+| 模型或特征表示 | 验证 Accuracy | 验证 Macro-F1 |
 |---|---:|---:|
 | MultinomialNB | 0.9104 | 0.9109 |
 | LogisticRegression | 0.9220 | 0.9224 |
-| LinearSVC | **0.9430** | **0.9431** |
+| word TF-IDF + LinearSVC | 0.9430 | 0.9431 |
+| char TF-IDF + LinearSVC | 0.9315 | 0.9319 |
+| char_wb TF-IDF + LinearSVC | 0.9369 | 0.9373 |
+| word + char_wb 融合 | **0.9484** | **0.9486** |
 
-线性 SVM 在高维、稀疏的 TF-IDF 特征上表现最好。
+字符特征单独使用时不如 word unigram，但与 word unigram 融合后性能提升，说明字符级特征能够补充技术型号、缩写、词形和特殊字符串信息。
+
+## 多随机种子实验
+
+为了检验单次划分结果的稳定性，使用以下 5 个随机种子重复实验：
+
+```text
+42, 123, 2025, 3407, 2026
+```
+
+word unigram 模型结果：
+
+```text
+Accuracy = 0.9427 ± 0.0026
+Macro-F1 = 0.9430 ± 0.0026
+```
+
+word + char_wb 融合模型结果：
+
+```text
+Accuracy = 0.9459 ± 0.0038
+Macro-F1 = 0.9461 ± 0.0039
+```
+
+融合模型的平均 Macro-F1 比 word unigram 提升约 0.31 个百分点。虽然融合模型的波动略有增加，但总体平均性能更高，因此选择融合模型作为最终方案。
 
 ## SVM 正则化参数实验
 
@@ -215,15 +243,15 @@ SGDClassifier(loss="log_loss")
 
 模型采用 batch size 为 256 的 mini-batch 增量训练，共训练 20 个 epoch、更新 480 次。每次参数更新后记录当前批次训练损失和固定验证集损失。
 
-由于不同 mini-batch 的样本组成不同，训练损失存在真实的局部波动；移动平均线用于显示整体趋势。最低验证损失为 1.4334，出现在第 480 次更新。这说明在当前观察范围内模型仍处于收敛阶段，尚未出现验证损失反弹。
+由于不同 mini-batch 的样本组成不同，训练损失存在真实的局部波动；移动平均线用于显示总体趋势。最低验证损失为 1.4334，出现在第 480 次更新。这说明在当前观察范围内模型仍处于收敛阶段，尚未出现验证损失反弹。
 
 验证损失是在同一个完整验证集上计算的，因此比单个 mini-batch 的训练损失更平滑。曲线的局部波动来自随机批次训练，不是人为添加的噪声。
 
 ## 错误分析
 
-最佳 LinearSVC 的错误主要集中在类别 0、1、2 和 7。
+最佳模型的错误主要集中在类别 0、1、2 和 7。
 
-| 类别 | 主要主题 |
+| 类别 | 依据高权重词推断的主题 |
 |---:|---|
 | 0 | 计算机图形学 |
 | 1 | Windows 软件 |
@@ -273,13 +301,17 @@ prediction.csv
 | `svm_feature_count_tuning.py` | TF-IDF 词表容量实验 |
 | `svm_feature_compare.py` | unigram 与 bigram 对比 |
 | `svm_header_ablation.py` | 邮件头消融实验 |
+| `char_tfidf_experiment.py` | 字符级 TF-IDF 对照实验 |
+| `word_char_fusion_experiment.py` | word 与 char_wb 特征融合 |
+| `multi_seed_experiment.py` | word unigram 多随机种子实验 |
+| `fusion_multi_seed_experiment.py` | 融合模型多随机种子实验 |
 | `loss_curve_experiment.py` | 按 epoch 记录损失的早期对照实验 |
-| `loss_minibatch_experiment.py` | Mini-batch Log Loss 与移动平均曲线 |
+| `loss_minibatch_experiment.py` | mini-batch Log Loss 曲线 |
 | `svm_error_analysis.py` | 分类报告与混淆矩阵 |
 | `inspect_errors.py` | 代表词和典型错误案例 |
-| `final_train_predict.py` | 最终训练与测试集预测 |
+| `final_fusion_predict.py` | 最终融合模型训练与预测 |
 
-这些脚本记录了完整的实验探索过程。验收时推荐直接运行根目录中的：
+验收时推荐直接运行根目录中的：
 
 ```bash
 python run_experiment.py
@@ -289,12 +321,17 @@ python run_experiment.py
 
 `results/` 中保存：
 
-- `run_results.csv`：统一模型比较结果；
-- `final_model_config.json`：最终模型配置；
+- `final_fusion_model_config.json`：最终融合模型配置；
+- `char_tfidf_results.csv`：字符级特征实验；
+- `word_char_fusion_results.csv`：特征融合实验；
+- `fusion_multi_seed_results.csv`：融合模型逐种子结果；
+- `fusion_multi_seed_summary.csv`：融合模型均值和标准差；
+- `multi_seed_results.csv`：word unigram 多种子结果；
+- `multi_seed_summary.csv`：word unigram 均值和标准差；
 - `loss_minibatch_curve.png`：mini-batch 损失曲线；
 - `loss_minibatch_history.csv`：mini-batch 损失记录；
-- SVM 参数实验结果和曲线；
-- TF-IDF 词表容量实验结果和曲线；
+- SVM 参数实验结果；
+- TF-IDF 词表容量实验结果；
 - unigram/bigram 对比结果；
 - 邮件头消融结果；
 - 混淆矩阵；
@@ -303,10 +340,11 @@ python run_experiment.py
 
 ## 可复现性
 
-- 所有实验固定随机种子为 `42`；
+- 所有实验固定随机种子；
 - 验证集按标签分层划分；
 - TF-IDF 只在训练子集上拟合；
 - 验证集仅使用已拟合的向量器转换；
 - 测试集不用于调参或模型选择；
 - 最终方案确定后，才使用全部有标签数据重新训练；
-- 模型参数、验证结果、损失记录和预测文件均已保存。
+- 模型参数、验证结果、损失记录和预测文件均已保存；
+- 根目录 `run_experiment.py` 可直接生成最终融合模型预测。

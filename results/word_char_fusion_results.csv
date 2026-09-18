@@ -1,0 +1,2 @@
+﻿feature_type,word_features,char_features,total_features,train_accuracy,valid_accuracy,train_macro_f1,valid_macro_f1,generalization_gap,time_seconds
+word_unigram + char_wb,38178,80000,118178,0.999830335934849,0.9484396200814111,0.9998306519898392,0.948622852125386,0.05120779986445323,20.868727000000945
